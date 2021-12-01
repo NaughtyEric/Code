@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include <stdarg.h>
+#include <string.h>
+#include "myscanf.cpp"
+#include "myprintf.cpp"
 
 #define MAX_LEN 4096
 
@@ -11,33 +13,27 @@ long long ll = 0;
 float f = 0.0;
 double d = 0.0;
 char str[MAX_LEN] = "";
+void *p = NULL;
 
-//输入、输出缓存区
+//输入缓存区、输出缓存区
 char in_buf[MAX_LEN], out_buf[MAX_LEN];
 
-//输入、输出缓冲区当前位置
-int in_idx, out_idx;
-
-//输入、输出格式化字符串
+//输入格式控制字符串、输出格式控制字符串
 char in_fmt[MAX_LEN], out_fmt[MAX_LEN];
 
-int myscanf(char *fmt, ...)
-{
-}
-
-int myprintf(char *fmt, ...)
-{
-}
+//输入缓冲区当前位置、输出缓冲区当前位置
+int in_idx, out_idx;
 
 int main()
 {
-    int ret1, ret2;
     gets(in_fmt);
     gets(out_fmt);
     gets(in_buf);
 
-    ret1 = myscanf(in_fmt, &d, &c);
-    ret2 = myprintf(out_fmt, d, c);
+    /* Will be replaced by script during testing - Begin */
+    myscanf(in_fmt, str, &i, &c);
+    myprintf(out_fmt, str, i, c);
+    /* Will be replaced by script during testing - End */
+
     puts(out_buf);
-    myprintf("%d %d\n", ret1, ret2);
 }
