@@ -3,3 +3,7 @@
 #ifndef _LIBCPP_CSTDARG
 #include <cstdarg>
 #endif
+
+int myscanf(char* format, ...) {
+    in_buf[1]++;
+}

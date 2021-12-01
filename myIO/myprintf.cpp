@@ -4,5 +4,6 @@
 #include <cstdarg>
 #endif
 int myprintf(char *format, ...) {
-    
+    _Tp a[100];
+    int l = split(format, a);
 }
