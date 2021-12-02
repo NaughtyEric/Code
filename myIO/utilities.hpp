@@ -12,10 +12,15 @@ struct splim
     int alignment;
     int align_length;
 
-    static const unsigned int DEC = 10, BIN = 2, HEX = 16, OCT = 8;
+    static const int DEC = 10, BIN = 2, HEX = 16, OCT = 8;
     int numsystem;
+    bool upperHEX;
 
-    splim ():numsystem(DEC), alignment(non_align) {}
+    bool is_signed;
+
+    size_t keep_len;
+
+    splim ():numsystem(DEC), alignment(non_align),is_signed(true) {}
 };
 
 class _Tp {
@@ -55,10 +60,10 @@ public:
         return Task.alignment;
     }
     
-    //@返回对齐长度（代数值，正数）
+    //@有对齐时返回对齐长度（代数值，正数）
     size_t align_length();
 
-    //@返回整数的进制
+    //@是整数时返回整数的进制
     int number_system ()
     {
         if(__typeTag != fmt ||
@@ -66,6 +71,19 @@ public:
                 throw(233);
         return Task.numsystem;
     }
+
+    //@是16进制时返回大小写
+    bool isupper_HEX()
+    {
+        if(number_system() != splim::HEX) throw(2);
+        return Task.upperHEX;
+    }
+
+    //@是整数时返回是否为无符号数字
+    bool Signed() 
+    {return Task.is_signed;}
+
+    size_t decimals_kept();
 
     friend int split(char*, _Tp[]);
 };
@@ -98,6 +116,11 @@ void _Tp::name (char *_re) {
 size_t _Tp::align_length() {
     if(Task.alignment == splim::non_align) throw(-3);
     return Task.align_length;
+}
+
+size_t decimals_kept() 
+{
+    
 }
 
 //分割format字符串，将其中的字符串/槽位拆分并以_Tp形式储存进arr数组内，返回数组长度
