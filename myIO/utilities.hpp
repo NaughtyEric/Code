@@ -5,7 +5,7 @@
 #ifndef _ASSERT_H_
 #include <cassert>
 #endif
-
+#define pass 0^0
 struct splim
 {
     static const int left_align = 1, right_align = -1, non_align = 0;
@@ -14,16 +14,17 @@ struct splim
     //对齐宽度。数值应为正整数
     size_t align_width;
 
-    static const int DEC = 10, BIN = 2, HEX = 16, OCT = 8;
+    static const int DEC = 10, HEX = 16, OCT = 8;
     //进制系统:DEC = 10(dafault), HEX = 16, OCT = 8
     int numsystem;
     //16进制情况下是否需要大写字母
     bool upperHEX;
 
-    //for double/float
+    //浮点数保留位数(for double/float) (default:6)
     size_t len_kept;
 
     static const size_t f = 1, g = 2, e = 3;  
+    //浮点数输出格式：f/g/e
     size_t f_type;
 
     splim ():alignment(non_align),numsystem(DEC),len_kept(6) {}
@@ -31,35 +32,47 @@ struct splim
 
 class _Tp {
     size_t __typeTag;
-    std::string __contents;
+    int __contents;
+    std::string str_contents;
     splim Task;
-protected:
+public:
     //重新设置content的内容
-    void set_content (char *);
+    void set_content (const int &);  void set_content (const std::string &);
+
     //设置限制的内容
     void set_limits (const splim &);
-public:
-    _Tp (const size_t &Tag, const std::string &ss="", const splim &limits=splim())
+    
+    /*初始化，参数依次为：类型，内容，特殊限制*/
+    _Tp (const size_t &Tag, const int &ss, const splim &limits=splim())
     {
-        assert(Tag == str || Tag == fmt);
+        assert(Tag == fmt);
         __typeTag = Tag, __contents = ss;
         Task = limits;
+    }
+    _Tp (const size_t &Tag, const std::string &ss)
+    {
+        assert(Tag == str);
+        __typeTag = Tag, str_contents = ss;
     }
     static const size_t str = 0;
     static const size_t fmt = 1;
 
+    static const int INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4,
+        FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12;
+
+        
     ~_Tp () {} 
     _Tp () {}
-    /*初始化，参数依次为：类型，内容，特殊限制*/
+    
 
     //返回类型：_Tp::str 或 _Tp::fmt
     size_t type() {return __typeTag;}
     
-    //@当类型为普通字符串时返回内容存入_re
-    void content (char *);
+    //@当类型为格式字符串时返回类型。
+    int name ();
     
-    //@当类型为格式字符串时返回类型名存入_re
-    void name (char *);
+    //@当类型为普通字符串时内容存入char*。结尾补\0
+    size_t content (char *);
     
     //返回对齐情况
     int align_limit()
@@ -74,7 +87,7 @@ public:
     int number_system ()
     {
         if(__typeTag != fmt ||
-            (__contents == "double" || __contents == "float" || __contents == "long double"))
+            (__contents == _Tp::DOUBLE || __contents == _Tp::FLOAT || __contents == LONGDOUBLE))
                 throw(233);
         return Task.numsystem;
     }
@@ -91,11 +104,12 @@ public:
 
     //@是浮点数时返回%f %g还是%e
     size_t fopt ();
-
-    friend int split(const char*, _Tp[]);
 };
-void _Tp::set_content(char *_newcontent) {
-    __contents = _newcontent;
+void _Tp::set_content(const int &_x) {
+    __contents = _x;
+}
+void _Tp::set_content(const std::string &_x) {
+    str_contents = _x;
 }
 
 void _Tp::set_limits(const splim &limits)
@@ -104,20 +118,19 @@ void _Tp::set_limits(const splim &limits)
     return;
 }
 
-void _Tp::content (char *_re) {
+int _Tp::name () {
     if(__typeTag != str) 
         throw(0);
-    int _len = __contents.size();
-    __contents.copy(_re, _len);
-    _re[_len] = '\0';
+    return __contents;
 }
 
-void _Tp::name (char *_re) {
+size_t _Tp::content (char *_re) {
     if(__typeTag != fmt) 
         throw(0);
-    int _len = __contents.size();
-    __contents.copy(_re, _len);
+    int _len = str_contents.size();
+    str_contents.copy(_re, _len);
     _re[_len] = '\0';
+    return str_contents.size();
 }
 
 size_t _Tp::align_width() {
@@ -127,14 +140,14 @@ size_t _Tp::align_width() {
 
 size_t _Tp::decimals_kept() 
 {
-    if(type() != _Tp::fmt || !(__contents == "double" || __contents == "float"))
+    if(type() != _Tp::fmt || !(__contents == DOUBLE || __contents == FLOAT))
         throw(5);
     return Task.len_kept;
 }
 
 size_t _Tp::fopt () {
     if(type() != _Tp::fmt) throw(-4);
-    if(__contents != "float" && __contents != "double") throw(-5);
+    if(__contents != FLOAT && __contents != DOUBLE) throw(-5);
     return Task.f_type;
 }
 
@@ -144,15 +157,17 @@ const size_t fmtl = 9;
 int split
     (const char *format, _Tp arr[]) 
 {
+
     int len = strlen(format);
     std::string tmp;
-    int size = -1;
+    int size = 0;
     for (size_t i = 0; i < len; ++i) {
         if(format[i] == '%')
         {
-            if(!tmp.empty()) {arr[++size] = _Tp(_Tp::str, tmp);tmp.clear();}
-            _Tp space = _Tp(_Tp::fmt);
-            splim limits = splim();
+            if(!tmp.empty()) {arr[size++] = _Tp(_Tp::str, tmp);tmp.clear();}
+            //store all related information
+
+            _Tp space = _Tp(_Tp::fmt, _Tp::INT); splim limits = splim();
 
             size_t end;
             for (end = i+1; end<len; ++end) {
@@ -170,34 +185,62 @@ int split
             int l_counts = 0;
             for(int j = i+1; j<end; ++j) {
                 if(format[j] == 'l') l_counts++;
-                if(format[j] == '.') {}
+                if(format[j] == '.') {pass;}
             }
             switch(format[end]) {
                 case 'd':
-                    if(l_counts == 0) space.set_content("int");
-                    else if (l_counts == 1) space.set_content("long");
-                    else if (l_counts == 2) space.set_content("long long");
+                    if(l_counts == 0) space.set_content(_Tp::INT);
+                    else if (l_counts == 1) space.set_content(_Tp::LONG);
+                    else if (l_counts == 2) space.set_content(_Tp::LONGLONG);
                     break;
                 case 'u':
-                    if(l_counts == 0) space.set_content("unsigned int");
+                    if(l_counts == 0) space.set_content(-_Tp::INT);
                     else if (l_counts == 1) space.set_content("unsigned long");
                     else if (l_counts == 2) space.set_content("unsigned long long");
                     break;
                 case 'f':
-                    
+                    limits.f_type = splim::f;
                     if(l_counts == 0) space.set_content("float");
                     else if (l_counts == 1) space.set_content("double");
                     break;
-                    
+                case 'g':
+                    pass;
+                    break;
+                case 's':
+                    space.set_content("string");
+                    break;
+                case 'c':
+                    space.set_content("char");
+                    break;
             }
             //检测格式字符
 
             //检测基础字符
 
             i = end+1;
+            arr[size++] = space;
+            tmp.clear();
         }
         else tmp.push_back(format[i]);
     }
-    if(!tmp.empty()) arr[++size] = _Tp(_Tp::str, tmp);
+    if(!tmp.empty()) arr[size++] = _Tp(_Tp::str, tmp);
     return size;
+}
+
+//把x以_n进制写进*_tar开头的字符串里
+template<typename tp>
+size_t write(char *_tar, tp x, int _n) {
+    int tmp[100] = {};
+    size_t p = 0;
+    if(x < 0) _tar[0] = '-', _tar++, x = -x;
+    while(x) {
+        tmp[++p] = x%_n;
+        x /= _n;
+    }
+    for(int i = p; i>0; --i)
+    {
+        *_tar = tmp[i]>10?tmp[i]-10+'A':tmp[i]+'0';
+        _tar++;
+    }
+    return p;
 }

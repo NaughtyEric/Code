@@ -26,14 +26,17 @@ int in_idx, out_idx;
 
 int main()
 {
+    myprintf("%d %dfdddsafa",43, 33);
+    return 0;
     gets(in_fmt);
     gets(out_fmt);
     gets(in_buf);
 
     /* Will be replaced by script during testing - Begin */
-    myscanf(in_fmt, str, &i, &c);
-    myprintf(out_fmt, str, i, c);
+    // myscanf(in_fmt, str, &i, &c);
+    // myprintf(out_fmt, str, i, c);
     /* Will be replaced by script during testing - End */
 
-    puts(out_buf);
+    // puts(out_buf);
+    return 0;
 }
