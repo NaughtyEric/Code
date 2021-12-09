@@ -2,16 +2,14 @@
 #ifndef _LIBCPP_CSTDARG
 #include <cstdarg>
 #endif
-#ifndef MYSTDIO_H
 #include "mystdio.hpp"
-#endif
-#ifndef __UTILITIES_
-#include "utilities.hpp"
-#endif 
 
-_Tp data[102];
-char buf[2000];
 int myprintf(const char *format, ...) {
+    _Tp *data;
+    char *buf;
+    data = new _Tp[102];
+    buf = new char[2000];
+
     va_list vl;
     int count;
     va_start(vl, format);
@@ -30,5 +28,8 @@ int myprintf(const char *format, ...) {
             }
         }
     }
+
+    delete buf;
+    delete data;
     return count;
 }

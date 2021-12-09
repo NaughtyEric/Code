@@ -1,10 +1,7 @@
+#ifndef __UTILITIES_
 #define __UTILITIES_
-#ifndef _LIBCPP_STRING
 #include <string>
-#endif
-#ifndef _ASSERT_H_
 #include <cassert>
-#endif
 #define pass 0^0
 struct splim
 {
@@ -244,3 +241,4 @@ size_t write(char *_tar, tp x, int _n) {
     }
     return p;
 }
+#endif
