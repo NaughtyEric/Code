@@ -56,6 +56,7 @@ public:
     enum {CHAR = 0, INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4,
         FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12, STRING = 100};
 
+        
     ~_Tp () {} 
     _Tp () {}
     
@@ -149,6 +150,7 @@ size_t _Tp::fopt () {
 const char fmtc[] = "dfgeucs%*";
 const size_t fmtl = 9;
 //分割format字符串，将其中的字符串/槽位拆分并以_Tp形式储存进arr数组内，返回数组长度
+int split (const char *, _Tp *arr);
 
 int split (const char *format, _Tp arr[]) 
 {
@@ -190,13 +192,13 @@ int split (const char *format, _Tp arr[])
                     break;
                 case 'u':
                     if(l_counts == 0) space.set_content(-_Tp::INT);
-                    else if (l_counts == 1) space.set_content("unsigned long");
-                    else if (l_counts == 2) space.set_content("unsigned long long");
+                    else if (l_counts == 1) space.set_content(-_Tp::LONG);
+                    else if (l_counts == 2) space.set_content(-_Tp::LONGLONG);
                     break;
                 case 'f':
                     limits.f_type = splim::f;
-                    if(l_counts == 0) space.set_content("float");
-                    else if (l_counts == 1) space.set_content("double");
+                    if(l_counts == 0) space.set_content(_Tp::FLOAT);
+                    else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
                     break;
                 case 'g':
                     pass;
@@ -212,7 +214,7 @@ int split (const char *format, _Tp arr[])
 
             //检测基础字符
 
-            i = end+1;
+            i = end;
             arr[size++] = space;
             tmp.clear();
         }

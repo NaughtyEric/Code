@@ -2,12 +2,13 @@
 #include <cstdarg>
 #include "mystdio.hpp"
 
+extern char out_buf[];
+extern int out_idx;
 int myprintf(const char *format, ...) {
     _Tp *data;
     char *buf;
     data = new _Tp[102];
     buf = new char[2000];
-
     va_list vl;
     int count;
     va_start(vl, format);

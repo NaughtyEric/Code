@@ -2,7 +2,8 @@
 #include <cstdarg>
 #include "mystdio.hpp"
 
-
+extern char in_buf[];
+extern int in_idx;
 int myscanf(char* format, ...) {
     _Tp *data;
     data = new _Tp[200];
