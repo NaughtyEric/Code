@@ -1,7 +1,5 @@
 #define __MYPRINTF
-#ifndef _LIBCPP_CSTDARG
 #include <cstdarg>
-#endif
 #include "mystdio.hpp"
 
 int myprintf(const char *format, ...) {

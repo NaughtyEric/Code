@@ -1,10 +1,6 @@
 #define __MYSCANF
-#ifndef _LIBCPP_CSTDARG
 #include <cstdarg>
-#endif
-#ifndef MYSTDIO_H
 #include "mystdio.hpp"
-#endif
 
 
 int myscanf(char* format, ...) {

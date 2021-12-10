@@ -51,13 +51,11 @@ public:
         assert(Tag == str);
         __typeTag = Tag, str_contents = ss;
     }
-    static const size_t str = 0;
-    static const size_t fmt = 1;
+    enum {str = 0, fmt = 1};
 
-    static const int INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4,
-        FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12;
+    enum {CHAR = 0, INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4,
+        FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12, STRING = 100};
 
-        
     ~_Tp () {} 
     _Tp () {}
     
@@ -151,8 +149,8 @@ size_t _Tp::fopt () {
 const char fmtc[] = "dfgeucs%*";
 const size_t fmtl = 9;
 //分割format字符串，将其中的字符串/槽位拆分并以_Tp形式储存进arr数组内，返回数组长度
-int split
-    (const char *format, _Tp arr[]) 
+
+int split (const char *format, _Tp arr[]) 
 {
 
     int len = strlen(format);
@@ -239,6 +237,8 @@ size_t write(char *_tar, tp x, int _n) {
         *_tar = tmp[i]>10?tmp[i]-10+'A':tmp[i]+'0';
         _tar++;
     }
+    _tar[p] = 0;
     return p;
 }
 #endif
+
