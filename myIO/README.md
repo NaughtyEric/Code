@@ -47,5 +47,3 @@ $\color{red}\text{@表示调用条件错误时抛出异常}$
 - bool isupper_HEX() @返回16进制的大小写状态，真为大写假为小写
 - size_t decimals_kept() @返回浮点数保留小数位数
 - size_t fopt() @返回浮点数%f/g/e对应常量
-
-Sorry for troubling you again, but when I fixed those problems in the project files and build it again, errors about "_out_buf" and "_out_idx" remained. Confusingly, I have not define an variable or function with this name.In fact, "out_buf" and "out_idx" were defined in **main.cpp**, and `extern char out_buf[]` and `extern int out_idx` have been added in **myprintf.cpp**.(For some reason I can't upload my code to github.) I asked my instructor about that, but he hadn't replied...
