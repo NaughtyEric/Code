@@ -115,13 +115,13 @@ void _Tp::set_limits(const splim &limits)
 }
 
 int _Tp::name () {
-    if(__typeTag != str) 
+    if(__typeTag != fmt)
         throw(0);
     return __contents;
 }
 
 size_t _Tp::content (char *_re) {
-    if(__typeTag != fmt) 
+    if(__typeTag != str) 
         throw(0);
     int _len = str_contents.size();
     str_contents.copy(_re, _len);
@@ -204,10 +204,10 @@ int split (const char *format, _Tp arr[])
                     pass;
                     break;
                 case 's':
-                    space.set_content("string");
+                    space.set_content(_Tp::STRING);
                     break;
                 case 'c':
-                    space.set_content("char");
+                    space.set_content(_Tp::CHAR);
                     break;
             }
             //检测格式字符
@@ -218,7 +218,15 @@ int split (const char *format, _Tp arr[])
             arr[size++] = space;
             tmp.clear();
         }
-        else tmp.push_back(format[i]);
+        else if (format[i] == '\\') {
+            if (isdigit(format[i+1])) { //OCT
+                
+            }else if (format[i+1] == 'x'){ //HEX
+
+            }else{
+                
+            }
+        }else tmp.push_back(format[i]);
     }
     if(!tmp.empty()) arr[size++] = _Tp(_Tp::str, tmp);
     return size;
@@ -242,5 +250,12 @@ size_t write(char *_tar, tp x, int _n) {
     _tar[p] = 0;
     return p;
 }
+
+template<typename tp>
+tp transform (const tp &type, int source, int target) {
+    int ans = 0;
+    ans = type;
+}
+
 #endif
 
