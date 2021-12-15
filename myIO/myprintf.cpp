@@ -40,12 +40,15 @@ int myprintf(const char *format, ...) {
                         out_buf[out_idx++] = ' ';
                 }
             }
+            count++;
         }
-        count++;
+        
     }
-    perror("awa");
+    for (int i = 0; i<l; ++i)
+        if (data[i].type() == _Tp::str)
+            printf("%s\n", data[i].str_contents.c_str());
+
     delete buf;
     delete data;
-    perror("qwq");
     return count;
 }

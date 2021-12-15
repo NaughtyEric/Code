@@ -26,12 +26,12 @@ int in_idx, out_idx;
 
 int main()
 {
-    myprintf("%d %dfdddsafa",43, 33);
+    gets(out_fmt);
+    myprintf(out_fmt,43, 33);
     int e = 2;
     printf("%d", e);
     return 0;
     gets(in_fmt);
-    gets(out_fmt);
     gets(in_buf);
 
     /* Will be replaced by script during testing - Begin */

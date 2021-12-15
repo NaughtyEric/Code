@@ -3,6 +3,13 @@
 #include <string>
 #include <cassert>
 #define pass 0^0
+
+template<typename tp>
+size_t write(char *, tp, int);
+template<typename tp>
+tp transform (const tp &, int, int);
+char rev_tp(char);
+
 struct splim
 {
     static const int left_align = 1, right_align = -1, non_align = 0;
@@ -30,11 +37,12 @@ struct splim
 class _Tp {
     size_t __typeTag;
     int __contents;
-    std::string str_contents;
     splim Task;
 public:
+    std::string str_contents;
     //重新设置content的内容
-    void set_content (const int &);  void set_content (const std::string &);
+    void set_content (const int &);
+    void set_content (const std::string &);
 
     //设置限制的内容
     void set_limits (const splim &);
@@ -220,13 +228,28 @@ int split (const char *format, _Tp arr[])
         }
         else if (format[i] == '\\') {
             if (isdigit(format[i+1])) { //OCT
-                
+                int len = 0, result = 0;
+                for (int k = 1; k<=3; ++k){
+                    if (isdigit(format[i+k]) && format[i+k] < '8') 
+                        result = result*8 + format[i+k] - '0';
+                    else break;
+                }
+                tmp.push_back((char)result);
             }else if (format[i+1] == 'x'){ //HEX
-
+                int len = 0, result = 0;
+                for (int k = 2; k<=3; ++k){
+                    if (isdigit(format[i+k]))
+                        result = result*16 + format[i+k] - '0';
+                    else if(isalpha(format[i+k]) && format[i+k] < 'G')
+                        result = result*16 + format[i+k] - 'A';
+                    else break;
+                }
+                tmp.push_back((char)result);
             }else{
-                
+                tmp.push_back(rev_tp(format[i+1]));
             }
-        }else tmp.push_back(format[i]);
+        }
+        else tmp.push_back(format[i]);
     }
     if(!tmp.empty()) arr[size++] = _Tp(_Tp::str, tmp);
     return size;
@@ -252,9 +275,24 @@ size_t write(char *_tar, tp x, int _n) {
 }
 
 template<typename tp>
-tp transform (const tp &type, int source, int target) {
-    int ans = 0;
-    ans = type;
+tp transform (const tp &x, int src_sys, int tar_sys) {
+    char buf[100] = {};
+    write(buf, x, src_sys);
+}
+
+char rev_tp (char f) {
+    if(f == 'a') return '\a';
+    if(f == 'b') return '\b';
+    if(f == 'n') return '\n';
+    if(f == 't') return '\t';
+    if(f == 'f') return '\f';
+    if(f == 'r') return '\r';
+    if(f == 'v') return '\v';
+    if(f == '\\') return '\\';
+    if(f == '\'') return '\'';
+    if(f == '\"') return '\"';
+    if(f == '?') return '?';
+    if(f == '0') return 0;
 }
 
 #endif
