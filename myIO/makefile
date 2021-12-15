@@ -1,12 +1,14 @@
-mystdio: main.o libmystdio.so
-	clang++ -o mystdio main.o -L. -lmystdio -Wl,-rpath=.
-libmystdio.so: myscanf.o myprintf.o
-	clang++ -shared -o libmystdio.so myscanf.o myprintf.o
+all:mystdio libmystdio.a main.o myscanf.o myprintf.o
+	
+mystdio: main.o libmystdio.a
+	clang++ -o mystdio main.o -L. -lmystdio -g -Wall
+libmystdio.a: myscanf.o myprintf.o
+	ar cr libmystdio.a myprintf.o myscanf.o
 main.o: main.cpp mystdio.hpp
-	clang++ -fPIC -c main.cpp
+	clang++ -c main.cpp -g -Wall
 myscanf.o: myscanf.cpp mystdio.hpp utilities.hpp
-	clang++ -fPIC -c myscanf.cpp
+	clang++ -c myscanf.cpp -g -Wall
 myprintf.o: myprintf.cpp mystdio.hpp utilities.hpp
-	clang++ -fPIC -c myprintf.cpp
+	clang++ -c myprintf.cpp -g -Wall
 clean:
-	rm -rf mystdio *.o *.a *.so
+	rm -rf mystdio *.o *.a *.a

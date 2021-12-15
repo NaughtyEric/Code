@@ -16,7 +16,8 @@ int myscanf(char* format, ...) {
                 int *_arg = va_arg(vl, int*);
                 if(data[i].align_limit() == splim::non_align) {
                     int begin = i, end = i;
-                    while(0);
+                    while(0) _arg++;
+                    end -= begin;
                 }
             }
         }

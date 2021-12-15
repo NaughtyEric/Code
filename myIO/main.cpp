@@ -27,6 +27,8 @@ int in_idx, out_idx;
 int main()
 {
     myprintf("%d %dfdddsafa",43, 33);
+    int e = 2;
+    printf("%d", e);
     return 0;
     gets(in_fmt);
     gets(out_fmt);
