@@ -48,7 +48,10 @@ int myprintf(const char *format, ...) {
         if (data[i].type() == _Tp::str)
             printf("%s\n", data[i].str_contents.c_str());
 
+    printf("begin Delete");
     delete buf;
+    printf("buf deleted");
     delete data;
+    printf("data deleted");
     return count;
 }

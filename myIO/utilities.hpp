@@ -1,3 +1,4 @@
+
 #ifndef __UTILITIES_
 #define __UTILITIES_
 #include <string>
@@ -115,7 +116,6 @@ void _Tp::set_content(const int &_x) {
 void _Tp::set_content(const std::string &_x) {
     str_contents = _x;
 }
-
 void _Tp::set_limits(const splim &limits)
 {
     Task = limits;
@@ -160,7 +160,7 @@ const size_t fmtl = 9;
 //分割format字符串，将其中的字符串/槽位拆分并以_Tp形式储存进arr数组内，返回数组长度
 int split (const char *, _Tp *arr);
 
-int split (const char *format, _Tp arr[]) 
+int split (const char *format, _Tp *arr) 
 {
 
     int len = strlen(format);
@@ -228,15 +228,16 @@ int split (const char *format, _Tp arr[])
         }
         else if (format[i] == '\\') {
             if (isdigit(format[i+1])) { //OCT
-                int len = 0, result = 0;
+                int result = 0;
                 for (int k = 1; k<=3; ++k){
                     if (isdigit(format[i+k]) && format[i+k] < '8') 
                         result = result*8 + format[i+k] - '0';
                     else break;
                 }
                 tmp.push_back((char)result);
+                
             }else if (format[i+1] == 'x'){ //HEX
-                int len = 0, result = 0;
+                int result = 0;
                 for (int k = 2; k<=3; ++k){
                     if (isdigit(format[i+k]))
                         result = result*16 + format[i+k] - '0';
@@ -246,7 +247,7 @@ int split (const char *format, _Tp arr[])
                 }
                 tmp.push_back((char)result);
             }else{
-                tmp.push_back(rev_tp(format[i+1]));
+                tmp.push_back(rev_tp(format[++i]));
             }
         }
         else tmp.push_back(format[i]);
@@ -293,6 +294,7 @@ char rev_tp (char f) {
     if(f == '\"') return '\"';
     if(f == '?') return '?';
     if(f == '0') return 0;
+    return f;
 }
 
 #endif
