@@ -27,13 +27,13 @@ int in_idx, out_idx;
 int main()
 {
     gets(out_fmt);
-    myprintf(out_fmt,43, 33);
-    int e = 2;
-    printf("%d", e);
+    float c = 432.421432143;
+    myprintf(out_fmt, c, 23.23);
+    puts(out_buf);
+    printf("%20.3f hhh %.*f\n", c, 10, 54.44);
     return 0;
     gets(in_fmt);
     gets(in_buf);
-
     /* Will be replaced by script during testing - Begin */
     // myscanf(in_fmt, str, &i, &c);
     // myprintf(out_fmt, str, i, c);

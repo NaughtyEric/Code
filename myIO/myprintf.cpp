@@ -1,5 +1,6 @@
 #define __MYPRINTF
 #include <cstdarg>
+#include <cmath>
 #include "mystdio.hpp"
 
 extern char out_buf[];
@@ -12,46 +13,82 @@ int myprintf(const char *format, ...) {
     va_list vl;
     int count = 0;
     va_start(vl, format);
-    int l = split(format, data);
-    for(int i = 0; i<l; ++i) {
-        int l, t, len;
+    int dataL = split(format, data);
+    for(int i = 0; i<dataL; ++i) {
+        int l, len;
         if(data[i].type() == _Tp::str) {
             data[i].content(out_buf+out_idx);
             while(out_buf[out_idx] != '\0')
                 out_idx++;
         }else if (data[i].type() == _Tp::fmt) {
             l = data[i].name();
-            if (l == _Tp::INT){
-                t = va_arg(vl, int);
+            if (l == _Tp::SHORT){
+                short t = va_arg(vl, int);
                 len = write(buf, t, data[i].number_system());
             }
+            if (l == _Tp::INT){
+                int t = va_arg(vl, int);
+                len = write(buf, t, data[i].number_system());
+            }
+            if (l == _Tp::LONG){
+                long t = va_arg(vl, long);
+                len = write(buf, t, data[i].number_system());
+            }
+            if (l == _Tp::LONGLONG){
+                long long t = va_arg(vl, long long);
+                len = write(buf, t, data[i].number_system());
+            }
+            
+            if (l == _Tp::CHAR) {
+                buf[0] = va_arg(vl, int);
+                len = 1;
+            }
+            if (l == _Tp::STRING) {
+                char *tar_str = va_arg(vl, char*);
+                for (len = 0; tar_str[len] != '\0';++len) {buf[len] = tar_str[len];}
+            }
+
+            if(l == _Tp::FLOAT || l == _Tp::DOUBLE) {
+                if (data[i].fopt() == splim::f){
+                    double tmp = va_arg(vl, double);
+                    len = write(buf, (int)floor(tmp), 10);
+                    tmp -= floor(tmp);
+                    buf[len++] = '.';
+                    for (int k = 1; k<=data[i].decimals_kept(); ++k) {
+                        tmp *= 10;
+                        len += write(buf+len, (int)floor(tmp), 10);
+                        tmp -= floor(tmp);
+                    }
+                }else if (data[i].fopt() == splim::e) {
+
+                }else if (data[i].fopt() == splim::g){
+
+                }
+            }
+        //alignment coping
             if(data[i].align_limit() == splim::non_align) {
                 for(int k = 0; k<len; ++k) {out_buf[out_idx++] = buf[k];}
             }else{
                 int ali_len = data[i].align_width();
-                int longer_than_limits = len - ali_len;
-                if (data[i].align_limit() == splim::left_align) {
-                    for(int k = 0; k<longer_than_limits; ++k)
+                int less_than_limits = ali_len - len;
+                if (data[i].align_limit() == splim::right_align) {
+                    for(int k = 0; k<less_than_limits; ++k)
                         out_buf[out_idx++] = ' ';
                     for(int k = 0; k<len; ++k) {out_buf[out_idx++] = buf[k];}
                 }else{
                     for(int k = 0; k<len; ++k) {out_buf[out_idx++] = buf[k];}
-                    for(int k = 0; k<longer_than_limits; ++k)
+                    for(int k = 0; k<less_than_limits; ++k)
                         out_buf[out_idx++] = ' ';
                 }
             }
+
+
             count++;
         }
         
     }
-    for (int i = 0; i<l; ++i)
-        if (data[i].type() == _Tp::str)
-            printf("%s\n", data[i].str_contents.c_str());
 
-    printf("begin Delete");
-    delete buf;
-    printf("buf deleted");
-    delete data;
-    printf("data deleted");
+    delete []buf;
+    delete []data;
     return count;
 }

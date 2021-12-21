@@ -3,6 +3,7 @@
 #define __UTILITIES_
 #include <string>
 #include <cassert>
+#include <cctype>
 #define pass 0^0
 
 template<typename tp>
@@ -185,12 +186,36 @@ int split (const char *format, _Tp *arr)
                     }
                 if (flag) break;
             }
-            //i~end为占位符部分，需要处理
+            //[i,end)为占位符部分，需要处理
 
             int l_counts = 0;
+            //[begin, end)
+            auto getdigit = [&format](int begin, int end) -> int{
+                int res = 0;
+                for (int __i = begin; __i < end; ++__i)
+                    res = res * 10 + format[__i] - '0';
+                return res;
+            };
             for(int j = i+1; j<end; ++j) {
-                if(format[j] == 'l') l_counts++;
-                if(format[j] == '.') {pass;}
+                if(format[j] == 'l') l_counts++; //judge whether it's long version
+                if(isdigit(format[j])) //caculate its width limits
+                {
+                    if(format[j-1] == '-')
+                        limits.alignment = splim::left_align;
+                    else
+                        limits.alignment = splim::right_align;
+                    int p = j;
+                    while(isdigit(format[p])) p++;
+                    limits.align_width = getdigit(j, p);
+                    j = p;
+                }
+                if(format[j] == '.') { //caculate its decimal limits(float)
+                    int p = j + 1;
+                    while(isdigit(format[++p]));
+                    limits.len_kept = getdigit(j+1, p);
+                    j = p - 1;
+                }
+                
             }
             switch(format[end]) {
                 case 'd':
@@ -209,7 +234,14 @@ int split (const char *format, _Tp *arr)
                     else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
                     break;
                 case 'g':
-                    pass;
+                    limits.f_type = splim::g;
+                    if(l_counts == 0) space.set_content(_Tp::FLOAT);
+                    else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
+                    break;
+                case 'e':
+                    limits.f_type = splim::e;
+                    if(l_counts == 0) space.set_content(_Tp::FLOAT);
+                    else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
                     break;
                 case 's':
                     space.set_content(_Tp::STRING);
@@ -223,6 +255,7 @@ int split (const char *format, _Tp *arr)
             //检测基础字符
 
             i = end;
+            space.set_limits(limits);
             arr[size++] = space;
             tmp.clear();
         }
@@ -235,7 +268,6 @@ int split (const char *format, _Tp *arr)
                     else break;
                 }
                 tmp.push_back((char)result);
-                
             }else if (format[i+1] == 'x'){ //HEX
                 int result = 0;
                 for (int k = 2; k<=3; ++k){
@@ -262,19 +294,21 @@ size_t write(char *_tar, tp x, int _n) {
     int tmp[100] = {};
     size_t p = 0;
     if(x < 0) _tar[0] = '-', _tar++, x = -x;
-    while(x) {
-        tmp[++p] = x%_n;
+    do {
+        tmp[p++] = x%_n;
         x /= _n;
-    }
-    for(int i = p; i>0; --i)
+    }while(x);
+    char *t = _tar;
+    for(int i = p-1; i>=0; --i)
     {
-        *_tar = tmp[i]>10?tmp[i]-10+'A':tmp[i]+'0';
-        _tar++;
+        *t = tmp[i]>10?tmp[i]-10+'A':tmp[i]+'0';
+        t++;
     }
     _tar[p] = 0;
     return p;
 }
 
+//failed
 template<typename tp>
 tp transform (const tp &x, int src_sys, int tar_sys) {
     char buf[100] = {};
@@ -282,18 +316,21 @@ tp transform (const tp &x, int src_sys, int tar_sys) {
 }
 
 char rev_tp (char f) {
-    if(f == 'a') return '\a';
-    if(f == 'b') return '\b';
-    if(f == 'n') return '\n';
-    if(f == 't') return '\t';
-    if(f == 'f') return '\f';
-    if(f == 'r') return '\r';
-    if(f == 'v') return '\v';
-    if(f == '\\') return '\\';
-    if(f == '\'') return '\'';
-    if(f == '\"') return '\"';
-    if(f == '?') return '?';
-    if(f == '0') return 0;
+    switch (f)
+    {
+        case 'a': return '\a';
+        case 'b': return '\b';
+        case 'n': return '\n';
+        case 't': return '\t';
+        case 'f': return '\f';
+        case 'r': return '\r';
+        case 'v': return '\v';
+        case '\\': return '\\';
+        case '\'': return '\'';
+        case '\"': return '\"';
+        case '?': return '?';
+        case '0': return 0;
+    }
     return f;
 }
 
