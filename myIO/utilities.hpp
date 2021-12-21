@@ -6,10 +6,11 @@
 #include <cctype>
 #define pass 0^0
 
+struct splim;
+class _Tp;
 template<typename tp>
-size_t write(char *, tp, int);
-template<typename tp>
-tp transform (const tp &, int, int);
+//size_t write(char *, tp, int, bool);
+int split (const char *, _Tp *arr);
 char rev_tp(char);
 
 struct splim
@@ -19,12 +20,14 @@ struct splim
     int alignment;
     //对齐宽度。数值应为正整数
     size_t align_width;
+    char align_fill;
 
     static const int DEC = 10, HEX = 16, OCT = 8;
     //进制系统:DEC = 10(dafault), HEX = 16, OCT = 8
     int numsystem;
-    //16进制情况下是否需要大写字母
-    bool upperHEX;
+
+    //是否需要大写字母
+    bool upperCase;
 
     //浮点数保留位数(for double/float) (default:6)
     size_t len_kept;
@@ -33,9 +36,12 @@ struct splim
     //浮点数输出格式：f/g/e
     size_t f_type;
 
-    splim ():alignment(non_align),numsystem(DEC),len_kept(6) {}
+    //有无#
+    bool Hashtag;
+    //*
+    bool Asterisk;
+    splim ():alignment(non_align),align_fill(' '),numsystem(DEC),upperCase(true),len_kept(6) {}
 };
-
 class _Tp {
     size_t __typeTag;
     int __contents;
@@ -62,9 +68,7 @@ public:
         __typeTag = Tag, str_contents = ss;
     }
     enum {str = 0, fmt = 1};
-
-    enum {CHAR = 0, INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4,
-        FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12, STRING = 100};
+    enum {CHAR = 0, INT = 1, SHORT = 2, LONG = 3, LONGLONG = 4, FLOAT = 10, DOUBLE = 11, LONGDOUBLE = 12, STRING = 100};
 
         
     ~_Tp () {} 
@@ -89,6 +93,8 @@ public:
     //@有对齐时返回对齐长度（代数值，正数）
     size_t align_width();
 
+    char align_fill();
+
     //@是整数时返回整数的进制
     int number_system ()
     {
@@ -98,18 +104,21 @@ public:
         return Task.numsystem;
     }
 
-    //@是16进制时返回大小写
-    bool isupper_HEX()
+    //@返回大小写
+    bool upperCase()
     {
-        if(number_system() != splim::HEX) throw(2);
-        return Task.upperHEX;
+        if(__typeTag == str) throw(-1);
+        return Task.upperCase;
     }
 
     //@是浮点数时返回保留小数位，默认为6
     size_t decimals_kept();
 
     //@是浮点数时返回%f %g还是%e
-    size_t fopt ();
+    size_t fopt();
+
+    bool hashtag();
+    bool asterisk();
 };
 void _Tp::set_content(const int &_x) {
     __contents = _x;
@@ -122,13 +131,11 @@ void _Tp::set_limits(const splim &limits)
     Task = limits;
     return;
 }
-
 int _Tp::name () {
     if(__typeTag != fmt)
         throw(0);
     return __contents;
 }
-
 size_t _Tp::content (char *_re) {
     if(__typeTag != str) 
         throw(0);
@@ -137,30 +144,37 @@ size_t _Tp::content (char *_re) {
     _re[_len] = '\0';
     return str_contents.size();
 }
-
 size_t _Tp::align_width() {
     if(Task.alignment == splim::non_align) throw(-3);
     return Task.align_width;
 }
-
 size_t _Tp::decimals_kept() 
 {
     if(type() != _Tp::fmt || !(__contents == DOUBLE || __contents == FLOAT))
         throw(5);
     return Task.len_kept;
 }
-
 size_t _Tp::fopt () {
     if(type() != _Tp::fmt) throw(-4);
     if(__contents != FLOAT && __contents != DOUBLE) throw(-5);
     return Task.f_type;
 }
+bool _Tp::hashtag()
+{
+    return Task.Hashtag;
+}
+bool _Tp::asterisk()
+{
+    return Task.Asterisk;
+}
+char _Tp::align_fill()
+{
+    return Task.align_fill;
+}
 
-const char fmtc[] = "dfgeucs%*";
-const size_t fmtl = 9;
+const char fmtc[] = "dfFgeEoxXucs%";
+const size_t fmtl = 13;
 //分割format字符串，将其中的字符串/槽位拆分并以_Tp形式储存进arr数组内，返回数组长度
-int split (const char *, _Tp *arr);
-
 int split (const char *format, _Tp *arr) 
 {
 
@@ -197,13 +211,14 @@ int split (const char *format, _Tp *arr)
                 return res;
             };
             for(int j = i+1; j<end; ++j) {
-                if(format[j] == 'l') l_counts++; //judge whether it's long version
                 if(isdigit(format[j])) //caculate its width limits
                 {
                     if(format[j-1] == '-')
                         limits.alignment = splim::left_align;
                     else
                         limits.alignment = splim::right_align;
+                    if(format[j] == '0')
+                        limits.align_fill = '0';
                     int p = j;
                     while(isdigit(format[p])) p++;
                     limits.align_width = getdigit(j, p);
@@ -215,8 +230,10 @@ int split (const char *format, _Tp *arr)
                     limits.len_kept = getdigit(j+1, p);
                     j = p - 1;
                 }
+                if(format[j] == 'l') l_counts++; //judge whether it's long version
                 
             }
+
             switch(format[end]) {
                 case 'd':
                     if(l_counts == 0) space.set_content(_Tp::INT);
@@ -224,11 +241,20 @@ int split (const char *format, _Tp *arr)
                     else if (l_counts == 2) space.set_content(_Tp::LONGLONG);
                     break;
                 case 'u':
+                case 'o':
+                case 'X':
+                case 'x':
+                    if (format[end] == 'o') limits.numsystem = splim::OCT;
+                    else if (format[end] == 'X' || format[end] == 'x') {
+                        limits.numsystem = splim::HEX;
+                        limits.upperCase = isupper(format[end]);
+                    }
                     if(l_counts == 0) space.set_content(-_Tp::INT);
                     else if (l_counts == 1) space.set_content(-_Tp::LONG);
                     else if (l_counts == 2) space.set_content(-_Tp::LONGLONG);
                     break;
                 case 'f':
+                case 'F':
                     limits.f_type = splim::f;
                     if(l_counts == 0) space.set_content(_Tp::FLOAT);
                     else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
@@ -239,7 +265,9 @@ int split (const char *format, _Tp *arr)
                     else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
                     break;
                 case 'e':
+                case 'E':
                     limits.f_type = splim::e;
+                    limits.upperCase = isupper(format[end]);
                     if(l_counts == 0) space.set_content(_Tp::FLOAT);
                     else if (l_counts == 1) space.set_content(_Tp::DOUBLE);
                     break;
@@ -260,7 +288,7 @@ int split (const char *format, _Tp *arr)
             tmp.clear();
         }
         else if (format[i] == '\\') {
-            if (isdigit(format[i+1])) { //OCT
+           /* if (isdigit(format[i+1])) { //OCT
                 int result = 0;
                 for (int k = 1; k<=3; ++k){
                     if (isdigit(format[i+k]) && format[i+k] < '8') 
@@ -278,9 +306,9 @@ int split (const char *format, _Tp *arr)
                     else break;
                 }
                 tmp.push_back((char)result);
-            }else{
+            }else{ */
                 tmp.push_back(rev_tp(format[++i]));
-            }
+            /*}*/
         }
         else tmp.push_back(format[i]);
     }
@@ -290,7 +318,7 @@ int split (const char *format, _Tp *arr)
 
 //把x以_n进制写进*_tar开头的字符串里
 template<typename tp>
-size_t write(char *_tar, tp x, int _n) {
+size_t write(char *_tar, tp x, int _n, bool upper=true) {
     int tmp[100] = {};
     size_t p = 0;
     if(x < 0) _tar[0] = '-', _tar++, x = -x;
@@ -301,18 +329,11 @@ size_t write(char *_tar, tp x, int _n) {
     char *t = _tar;
     for(int i = p-1; i>=0; --i)
     {
-        *t = tmp[i]>10?tmp[i]-10+'A':tmp[i]+'0';
+        *t = tmp[i]>10?tmp[i]-10+(upper?'A':'a'):tmp[i]+'0';
         t++;
     }
     _tar[p] = 0;
     return p;
-}
-
-//failed
-template<typename tp>
-tp transform (const tp &x, int src_sys, int tar_sys) {
-    char buf[100] = {};
-    write(buf, x, src_sys);
 }
 
 char rev_tp (char f) {

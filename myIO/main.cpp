@@ -26,11 +26,11 @@ int in_idx, out_idx;
 
 int main()
 {
-    gets(out_fmt);
-    float c = 432.421432143;
-    myprintf(out_fmt, c, 23.23);
+    //gets(out_fmt);
+    memcpy(out_fmt, "%c %u %lX %llo %e\n", sizeof("%c %d %05ld %lld %e\n"));
+    myprintf(out_fmt, '4', 12, 432l, 3111111121ll, -4243342234231.32432);
     puts(out_buf);
-    printf("%20.3f hhh %.*f\n", c, 10, 54.44);
+    printf(out_fmt, '4', 12, 432l, 3111111121ll, -4243342234231.32432);
     return 0;
     gets(in_fmt);
     gets(in_buf);

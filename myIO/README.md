@@ -16,12 +16,16 @@
 
 #### **变量**
 
-- int alignment  宽度限制模式，left_align/right_align/non_align
+- int alignment  宽度限制模式，left_align/right_align/non_align， 默认无
 - size_t align_width 格式化：宽度
-- int numsystem  进制，DEC/HEX/OCT
-- bool upperHEX 16进制是否需要大写
-- size_t len_kept 小数保留位数
+- char align_fill 对齐填充字符，默认空格
+- int numsystem  进制，DEC/HEX/OCT， 默认十进制
+- bool upperCase 是否需要大写
+- size_t len_kept 小数保留位数，默认 6
 - size_t f_type 浮点数输出格式,f/g/e
+- bool Hashtag 有无井号
+- bool Asterisk 有无星号
+
 
 ### _Tp
 
@@ -43,7 +47,9 @@ $\color{red}\text{@表示调用条件错误时抛出异常}$
 - size_t content (char *) @将字符串存入参数中并返回其长度
 - int align_limit() 返回对齐情况
 - size_t align_width() @有对齐时返回对齐长度
+- align_fill() 返回补充对齐填充字符
 - int number_system () @返回整数进制
-- bool isupper_HEX() @返回16进制的大小写状态，真为大写假为小写
+- bool upperCase() 返回大小写状态，真为大写假为小写
 - size_t decimals_kept() @返回浮点数保留小数位数
 - size_t fopt() @返回浮点数%f/g/e对应常量
+- bool _Tp::hashtag() 返回有无井号，真为有

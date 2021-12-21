@@ -4,6 +4,11 @@
 
 extern char in_buf[];
 extern int in_idx;
+int is_delimiter(char ch) //判断是否是分隔符
+{
+    return (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v');
+}
+
 int myscanf(char* format, ...) {
     _Tp *data;
     data = new _Tp[200];

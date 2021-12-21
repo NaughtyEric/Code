@@ -4,4 +4,5 @@
 
 int myprintf(const char *, ...);
 int myscanf (const char *, ...);
+int is_delimiter(char);
 #endif
